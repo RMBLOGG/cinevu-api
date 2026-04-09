@@ -1,1 +1,1118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cinevu API</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #070710;
+      --surface:   #0d0d1a;
+      --surface2:  #111120;
+      --border:    #1e1e35;
+      --border2:   #252540;
+      --accent:    #ff5722;
+      --accent2:   #ff8c42;
+      --green:     #00e5a0;
+      --blue:      #4fc3f7;
+      --text:      #eef0f8;
+      --text2:     #9ba3c0;
+      --muted:     #5a6080;
+      --code-bg:   #07070f;
+      --radius:    12px;
+    }
 
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,87,34,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,87,34,0.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* HERO */
+    .hero {
+      position: relative;
+      padding: 60px 20px 50px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .hero-orb {
+      position: absolute;
+      top: -120px; left: 50%;
+      transform: translateX(-50%);
+      width: min(800px, 120vw);
+      height: 400px;
+      background: radial-gradient(ellipse at 50% 30%, rgba(255,87,34,0.12) 0%, rgba(255,87,34,0.03) 40%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,229,160,0.07);
+      border: 1px solid rgba(0,229,160,0.2);
+      border-radius: 999px;
+      padding: 5px 14px 5px 10px;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--green);
+      margin-bottom: 20px;
+      letter-spacing: 0.08em;
+      animation: fadeDown 0.5s ease both;
+    }
+
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { transform: scale(1); opacity: 1; }
+      50%      { transform: scale(1.4); opacity: 0.6; }
+    }
+
+    .hero-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      animation: fadeDown 0.5s 0.1s ease both;
+    }
+
+    .hero h1 {
+      font-size: clamp(44px, 11vw, 88px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 0.95;
+      margin-bottom: 16px;
+      animation: fadeDown 0.5s 0.15s ease both;
+    }
+
+    .hero h1 .cine {
+      background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero h1 .vu {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .version-tag {
+      display: inline-block;
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      color: var(--muted);
+      border: 1px solid var(--border2);
+      border-radius: 4px;
+      padding: 2px 8px;
+      margin-left: 8px;
+      vertical-align: middle;
+      -webkit-text-fill-color: var(--muted);
+    }
+
+    .hero-sub {
+      color: var(--text2);
+      font-size: 14px;
+      max-width: 420px;
+      margin: 0 auto 24px;
+      line-height: 1.75;
+      animation: fadeDown 0.5s 0.2s ease both;
+    }
+
+    .base-url-bar {
+      display: inline-flex;
+      align-items: center;
+      background: var(--code-bg);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      margin-bottom: 24px;
+      overflow: hidden;
+      animation: fadeDown 0.5s 0.25s ease both;
+      max-width: calc(100vw - 40px);
+    }
+
+    .base-url-label {
+      padding: 9px 14px;
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,0.02);
+      border-right: 1px solid var(--border);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .base-url-val {
+      padding: 9px 14px;
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: var(--accent2);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .hero-links {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      animation: fadeDown 0.5s 0.3s ease both;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all .2s;
+      cursor: pointer;
+      border: none;
+      font-family: 'Outfit', sans-serif;
+    }
+    .btn-outline {
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      background: var(--surface);
+    }
+    .btn-outline:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* STICKY NAV */
+    .sticky-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(7,7,16,0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .sticky-nav::-webkit-scrollbar { display: none; }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      max-width: 860px;
+      margin: 0 auto;
+      white-space: nowrap;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 12px 14px;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: color .18s;
+      font-family: 'Outfit', sans-serif;
+      text-decoration: none;
+      border-bottom: 2px solid transparent;
+      flex-shrink: 0;
+    }
+    .nav-btn:hover { color: var(--text); }
+    .nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* WRAP */
+    .wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 16px 80px;
+      position: relative;
+      z-index: 1;
+    }
+    @media (min-width: 600px) { .wrap { padding: 0 24px 100px; } }
+
+    /* SECTION HEADER */
+    .sec-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 40px 0 14px;
+    }
+
+    .sec-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: rgba(255,87,34,0.1);
+      border: 1px solid rgba(255,87,34,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .sec-head h2 {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text2);
+    }
+
+    /* WARNING */
+    .warning {
+      margin: 28px 0 0;
+      background: rgba(239,68,68,0.04);
+      border: 1px solid rgba(239,68,68,0.2);
+      border-radius: var(--radius);
+      padding: 16px 18px 16px 22px;
+      position: relative;
+    }
+
+    .warning::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, #ef4444, #f87171);
+      border-radius: var(--radius) 0 0 var(--radius);
+    }
+
+    .warning h3 {
+      color: #f87171;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .warning p {
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.7;
+    }
+
+    .warning p + p { margin-top: 6px; }
+    .warning strong { color: #fca5a5; font-weight: 600; }
+    .warning-roast {
+      margin-top: 12px !important;
+      font-size: 12px !important;
+      font-weight: 700;
+      color: #fbbf24 !important;
+      background: rgba(251,191,36,0.06);
+      border: 1px dashed rgba(251,191,36,0.25);
+      border-radius: 6px;
+      padding: 8px 12px;
+      letter-spacing: 0.02em;
+    }
+
+    /* QUICK REF TABLE */
+    .ref-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .ref-table-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .ref-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      min-width: 480px;
+    }
+
+    .ref-table th {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.015);
+    }
+
+    .ref-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      color: var(--text2);
+      font-size: 12.5px;
+    }
+
+    .ref-table td:first-child {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--text);
+    }
+
+    .ref-table tr:last-child td { border-bottom: none; }
+    .ref-table tr:hover td { background: rgba(255,87,34,0.03); }
+    .ref-table tr:hover td:first-child { color: var(--accent2); }
+
+    .param-badge {
+      display: inline-block;
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      color: var(--accent);
+      background: rgba(255,87,34,0.08);
+      border: 1px solid rgba(255,87,34,0.18);
+      border-radius: 4px;
+      padding: 1px 6px;
+    }
+
+    .param-none { color: var(--muted); font-size: 11px; }
+
+    /* ENDPOINT CARD */
+    .ep {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 6px;
+      overflow: hidden;
+      transition: border-color .25s, box-shadow .25s;
+    }
+    .ep:hover { border-color: rgba(255,87,34,0.25); }
+    .ep.open  { border-color: rgba(255,87,34,0.35); }
+
+    .ep-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      cursor: pointer;
+      user-select: none;
+      gap: 10px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ep-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .badge {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 4px 9px;
+      border-radius: 5px;
+      background: rgba(255,87,34,0.1);
+      color: var(--accent);
+      border: 1px solid rgba(255,87,34,0.25);
+      flex-shrink: 0;
+    }
+
+    .badge.post {
+      background: rgba(79,195,247,0.08);
+      color: var(--blue);
+      border-color: rgba(79,195,247,0.2);
+    }
+
+    .ep-path {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ep-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .ep-title {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      display: none;
+    }
+    @media (min-width: 540px) { .ep-title { display: block; } }
+
+    .chev {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform .25s cubic-bezier(.4,0,.2,1), background .2s, border-color .2s;
+    }
+
+    .chev svg {
+      width: 10px; height: 10px;
+      stroke: var(--muted);
+      transition: stroke .2s;
+    }
+
+    .ep.open .chev {
+      transform: rotate(180deg);
+      background: rgba(255,87,34,0.08);
+      border-color: rgba(255,87,34,0.25);
+    }
+    .ep.open .chev svg { stroke: var(--accent); }
+
+    /* Smooth accordion */
+    .ep-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .35s cubic-bezier(.4,0,.2,1);
+    }
+
+    .ep-body-inner {
+      border-top: 1px solid var(--border);
+      padding: 16px;
+    }
+
+    .ep-desc {
+      font-size: 13.5px;
+      color: var(--text2);
+      line-height: 1.7;
+      margin-bottom: 14px;
+    }
+
+    .ep-desc code {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--accent2);
+      background: rgba(255,140,66,0.08);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    .ep-note {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--blue);
+      background: rgba(79,195,247,0.05);
+      border: 1px solid rgba(79,195,247,0.14);
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      line-height: 1.65;
+      word-break: break-all;
+    }
+
+    /* CODE BLOCK */
+    .code-wrap {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .code-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.015);
+    }
+
+    .code-lbl {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .code-lbl::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.6;
+    }
+
+    .copy-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border2);
+      border-radius: 5px;
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: all .18s;
+    }
+    .copy-btn:hover { color: var(--accent); border-color: rgba(255,87,34,0.4); }
+    .copy-btn.copied { color: var(--green); border-color: rgba(0,229,160,0.4); }
+
+    .code-wrap pre {
+      font-family: 'Space Mono', monospace;
+      font-size: 11.5px;
+      line-height: 1.8;
+      color: #8892b0;
+      padding: 16px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .k  { color: #7dd3fc; }
+    .s  { color: #86efac; }
+    .n  { color: #fbbf24; }
+    .b  { color: #f472b6; }
+    .nl { color: var(--muted); }
+    .c  { color: #4a5270; font-style: italic; }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 28px 20px;
+      border-top: 1px solid var(--border);
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      position: relative;
+      z-index: 1;
+      letter-spacing: 0.04em;
+      line-height: 1.8;
+    }
+    footer a { color: var(--accent2); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+    @media (max-width: 400px) {
+      .hero { padding: 50px 16px 40px; }
+      .base-url-val { font-size: 10px; }
+      .ep-path { font-size: 10.5px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-orb"></div>
+  <div class="status-pill">
+    <span class="status-dot"></span>
+    API ONLINE
+  </div>
+  <p class="hero-eyebrow">REST API DOCUMENTATION</p>
+  <h1>
+    <span class="cine">CINE</span><span class="vu">VU</span>
+    <span class="version-tag">v1.1.0</span>
+  </h1>
+  <p class="hero-sub">REST API scraper untuk streaming film &amp; series sub Indo.<br>Data diambil langsung dari breezyandaman.com.</p>
+  <div class="base-url-bar">
+    <span class="base-url-label">Base URL</span>
+    <span class="base-url-val">https://cinevu-api.vercel.app</span>
+  </div>
+  <div class="hero-links">
+    <a href="https://cinevu.vercel.app" class="btn btn-outline" target="_blank">🎬 Tonton Film</a>
+  </div>
+</div>
+
+<nav class="sticky-nav">
+  <div class="nav-inner">
+    <a href="#info"      class="nav-btn active">⚠️ Info</a>
+    <a href="#quick-ref" class="nav-btn">⚡ Quick Ref</a>
+    <a href="#endpoints" class="nav-btn">📡 Endpoints</a>
+    <a href="#filter"    class="nav-btn">🔍 Filter</a>
+    <a href="#category"  class="nav-btn">🎭 Kategori</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <div id="info" class="warning" style="margin-top:28px">
+    <h3>⚠️ Info Penting</h3>
+    <p>⚡ Gunakan API dengan bijak dan jangan spamming!</p>
+    <p>🛡️ <strong>Tujuan Rate Limit:</strong> Melindungi server dari serangan Hama DDoS dan aktivitas spammer yang dapat mengganggu layanan untuk pengguna lain.</p>
+    <p class="warning-roast">MINIMAL TAU DIRI.. DI KASI AKSES GRATIS MALAH NGELUNJAK 😤</p>
+  </div>
+
+  <div id="quick-ref" class="sec-head">
+    <div class="sec-icon">⚡</div>
+    <h2>Quick Reference</h2>
+  </div>
+
+  <div class="ref-wrap">
+    <div class="ref-table-scroll">
+      <table class="ref-table">
+        <thead>
+          <tr><th>Endpoint</th><th>Deskripsi</th><th>Param Wajib</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>/api/movies</td><td>Film terbaru homepage</td><td><span class="param-none">—</span></td></tr>
+          <tr><td>/api/search</td><td>Cari film/series</td><td><span class="param-badge">q</span></td></tr>
+          <tr><td>/api/detail</td><td>Detail film + daftar episode</td><td><span class="param-badge">url</span></td></tr>
+          <tr><td>/api/player</td><td>Server streaming (embed links)</td><td><span class="param-badge">post_id, url</span></td></tr>
+          <tr><td>/api/episode</td><td>Detail episode + semua player</td><td><span class="param-badge">url</span></td></tr>
+          <tr><td>/api/genre/{slug}</td><td>Filter per genre</td><td><span class="param-none">—</span></td></tr>
+          <tr><td>/api/year/{year}</td><td>Filter per tahun</td><td><span class="param-none">—</span></td></tr>
+          <tr><td>/api/country/{country}</td><td>Filter per negara</td><td><span class="param-none">—</span></td></tr>
+          <tr><td>/api/series</td><td>Daftar TV Series</td><td><span class="param-none">—</span></td></tr>
+          <tr><td>/api/trending</td><td>Film trending</td><td><span class="param-none">—</span></td></tr>
+          <tr><td>/api/anime</td><td>Kategori Anime</td><td><span class="param-none">—</span></td></tr>
+          <tr><td>/api/hentai</td><td>Kategori Hentai</td><td><span class="param-none">—</span></td></tr>
+          <tr><td>/api/semi</td><td>Film Semi (semua)</td><td><span class="param-none">—</span></td></tr>
+          <tr><td>/api/semi/{sub}</td><td>Semi sub-kategori</td><td><span class="param-none">—</span></td></tr>
+          <tr><td>/api/coming-soon</td><td>Film segera tayang</td><td><span class="param-none">—</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ENDPOINTS -->
+  <div id="endpoints" class="sec-head">
+    <div class="sec-icon">📡</div>
+    <h2>Endpoints</h2>
+  </div>
+
+  <div class="ep" onclick="toggle(this)">
+    <div class="ep-head">
+      <div class="ep-left">
+        <span class="badge">GET</span>
+        <span class="ep-path">/api/movies?page=1</span>
+      </div>
+      <div class="ep-right">
+        <span class="ep-title">Film Terbaru</span>
+        <span class="chev"><svg fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></span>
+      </div>
+    </div>
+    <div class="ep-body">
+      <div class="ep-body-inner">
+        <p class="ep-desc">Mengambil daftar film terbaru dari halaman utama. Gunakan parameter <code>page</code> untuk navigasi halaman.</p>
+        <div class="code-wrap">
+          <div class="code-top"><span class="code-lbl">Response JSON</span><button class="copy-btn" onclick="cp(this,event)">Copy</button></div>
+          <pre>{
+  <span class="k">"success"</span>: <span class="b">true</span>,
+  <span class="k">"page"</span>: <span class="n">1</span>,
+  <span class="k">"total"</span>: <span class="n">20</span>,
+  <span class="k">"next_page"</span>: <span class="s">"https://breezyandaman.com/page/2/"</span>,
+  <span class="k">"results"</span>: [
+    {
+      <span class="k">"url"</span>: <span class="s">"https://breezyandaman.com/thriller/the-residence-2025/"</span>,
+      <span class="k">"title"</span>: <span class="s">"The Residence (2025)"</span>,
+      <span class="k">"poster"</span>: <span class="s">"https://..."</span>,
+      <span class="k">"rating"</span>: <span class="s">"6.3"</span>,
+      <span class="k">"quality"</span>: <span class="s">"HD"</span>,
+      <span class="k">"duration"</span>: <span class="s">"110 min"</span>,
+      <span class="k">"episodes"</span>: <span class="s">""</span>
+    }
+  ]
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ep" onclick="toggle(this)">
+    <div class="ep-head">
+      <div class="ep-left">
+        <span class="badge">GET</span>
+        <span class="ep-path">/api/search?q={query}&amp;page=1</span>
+      </div>
+      <div class="ep-right">
+        <span class="ep-title">Pencarian</span>
+        <span class="chev"><svg fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></span>
+      </div>
+    </div>
+    <div class="ep-body">
+      <div class="ep-body-inner">
+        <p class="ep-desc">Cari film atau series berdasarkan judul. Parameter <code>q</code> wajib diisi.</p>
+        <div class="code-wrap">
+          <div class="code-top"><span class="code-lbl">Response JSON</span><button class="copy-btn" onclick="cp(this,event)">Copy</button></div>
+          <pre>{
+  <span class="k">"success"</span>: <span class="b">true</span>,
+  <span class="k">"query"</span>: <span class="s">"avengers"</span>,
+  <span class="k">"page"</span>: <span class="n">1</span>,
+  <span class="k">"total"</span>: <span class="n">8</span>,
+  <span class="k">"results"</span>: [ <span class="c">/* array movie card */</span> ]
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ep" onclick="toggle(this)">
+    <div class="ep-head">
+      <div class="ep-left">
+        <span class="badge">GET</span>
+        <span class="ep-path">/api/detail?url={url}</span>
+      </div>
+      <div class="ep-right">
+        <span class="ep-title">Detail Film</span>
+        <span class="chev"><svg fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></span>
+      </div>
+    </div>
+    <div class="ep-body">
+      <div class="ep-body-inner">
+        <p class="ep-desc">Mengambil detail lengkap film termasuk sinopsis, genre, cast, dan daftar episode (untuk series).</p>
+        <div class="code-wrap">
+          <div class="code-top"><span class="code-lbl">Response JSON</span><button class="copy-btn" onclick="cp(this,event)">Copy</button></div>
+          <pre>{
+  <span class="k">"success"</span>: <span class="b">true</span>,
+  <span class="k">"title"</span>: <span class="s">"The Residence (2025)"</span>,
+  <span class="k">"poster"</span>: <span class="s">"https://..."</span>,
+  <span class="k">"synopsis"</span>: <span class="s">"..."</span>,
+  <span class="k">"rating"</span>: <span class="s">"6.3"</span>,
+  <span class="k">"duration"</span>: <span class="s">"110 min"</span>,
+  <span class="k">"year"</span>: <span class="s">"2025"</span>,
+  <span class="k">"genre"</span>: [<span class="s">"Thriller"</span>, <span class="s">"Drama"</span>],
+  <span class="k">"country"</span>: <span class="s">"USA"</span>,
+  <span class="k">"post_id"</span>: <span class="s">"12345"</span>,
+  <span class="k">"episodes"</span>: [
+    { <span class="k">"title"</span>: <span class="s">"Episode 1"</span>, <span class="k">"url"</span>: <span class="s">"https://..."</span> }
+  ]
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ep" onclick="toggle(this)">
+    <div class="ep-head">
+      <div class="ep-left">
+        <span class="badge post">POST</span>
+        <span class="ep-path">/api/player</span>
+      </div>
+      <div class="ep-right">
+        <span class="ep-title">Streaming Player</span>
+        <span class="chev"><svg fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></span>
+      </div>
+    </div>
+    <div class="ep-body">
+      <div class="ep-body-inner">
+        <p class="ep-desc">Mengambil daftar server streaming (embed URLs). Memerlukan <code>post_id</code> dan <code>url</code> dari endpoint detail.</p>
+        <div class="ep-note">📌 Body: { "post_id": "12345", "url": "https://breezyandaman.com/..." }</div>
+        <div class="code-wrap">
+          <div class="code-top"><span class="code-lbl">Response JSON</span><button class="copy-btn" onclick="cp(this,event)">Copy</button></div>
+          <pre>{
+  <span class="k">"success"</span>: <span class="b">true</span>,
+  <span class="k">"servers"</span>: [
+    { <span class="k">"server"</span>: <span class="s">"p1"</span>, <span class="k">"url"</span>: <span class="s">"https://embed1.example.com/v/abc"</span> },
+    { <span class="k">"server"</span>: <span class="s">"p2"</span>, <span class="k">"url"</span>: <span class="s">"https://embed2.example.com/v/abc"</span> }
+  ]
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ep" onclick="toggle(this)">
+    <div class="ep-head">
+      <div class="ep-left">
+        <span class="badge">GET</span>
+        <span class="ep-path">/api/episode?url={url}</span>
+      </div>
+      <div class="ep-right">
+        <span class="ep-title">Detail Episode</span>
+        <span class="chev"><svg fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></span>
+      </div>
+    </div>
+    <div class="ep-body">
+      <div class="ep-body-inner">
+        <p class="ep-desc">Detail episode series beserta semua server player yang tersedia. URL diambil dari array episodes di endpoint detail.</p>
+        <div class="code-wrap">
+          <div class="code-top"><span class="code-lbl">Response JSON</span><button class="copy-btn" onclick="cp(this,event)">Copy</button></div>
+          <pre>{
+  <span class="k">"success"</span>: <span class="b">true</span>,
+  <span class="k">"title"</span>: <span class="s">"Episode 1 - S01E01"</span>,
+  <span class="k">"post_id"</span>: <span class="s">"99123"</span>,
+  <span class="k">"servers"</span>: [
+    { <span class="k">"server"</span>: <span class="s">"p1"</span>, <span class="k">"url"</span>: <span class="s">"https://embed1.example.com/v/abc"</span> },
+    { <span class="k">"server"</span>: <span class="s">"p2"</span>, <span class="k">"url"</span>: <span class="s">"https://embed2.example.com/v/abc"</span> }
+  ]
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTER -->
+  <div id="filter" class="sec-head">
+    <div class="sec-icon">🔍</div>
+    <h2>Filter</h2>
+  </div>
+
+  <div class="ep" onclick="toggle(this)">
+    <div class="ep-head">
+      <div class="ep-left">
+        <span class="badge">GET</span>
+        <span class="ep-path">/api/genre/{slug}?page=1</span>
+      </div>
+      <div class="ep-right">
+        <span class="ep-title">Filter Genre</span>
+        <span class="chev"><svg fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></span>
+      </div>
+    </div>
+    <div class="ep-body">
+      <div class="ep-body-inner">
+        <p class="ep-desc">Filter film berdasarkan genre. Slug sesuai kategori di situs.</p>
+        <div class="ep-note">📌 Slug: action · drama · thriller · horror · comedy · romance · mystery · crime · fantasy · science-fiction · adventure · family · music</div>
+        <div class="code-wrap">
+          <div class="code-top"><span class="code-lbl">Response JSON</span><button class="copy-btn" onclick="cp(this,event)">Copy</button></div>
+          <pre>{
+  <span class="k">"success"</span>: <span class="b">true</span>,
+  <span class="k">"genre"</span>: <span class="s">"action"</span>,
+  <span class="k">"page"</span>: <span class="n">1</span>,
+  <span class="k">"total"</span>: <span class="n">20</span>,
+  <span class="k">"next_page"</span>: <span class="s">"https://..."</span>,
+  <span class="k">"results"</span>: [ <span class="c">/* array movie card */</span> ]
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ep" onclick="toggle(this)">
+    <div class="ep-head">
+      <div class="ep-left">
+        <span class="badge">GET</span>
+        <span class="ep-path">/api/year/{year}?page=1</span>
+      </div>
+      <div class="ep-right">
+        <span class="ep-title">Filter Tahun</span>
+        <span class="chev"><svg fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></span>
+      </div>
+    </div>
+    <div class="ep-body">
+      <div class="ep-body-inner">
+        <p class="ep-desc">Filter film berdasarkan tahun rilis (2017–2026).</p>
+        <div class="ep-note">📌 Contoh: /api/year/2025?page=1</div>
+        <div class="code-wrap">
+          <div class="code-top"><span class="code-lbl">Response JSON</span><button class="copy-btn" onclick="cp(this,event)">Copy</button></div>
+          <pre>{
+  <span class="k">"success"</span>: <span class="b">true</span>,
+  <span class="k">"year"</span>: <span class="s">"2025"</span>,
+  <span class="k">"page"</span>: <span class="n">1</span>,
+  <span class="k">"total"</span>: <span class="n">20</span>,
+  <span class="k">"next_page"</span>: <span class="nl">null</span>,
+  <span class="k">"results"</span>: [ <span class="c">/* array movie card */</span> ]
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ep" onclick="toggle(this)">
+    <div class="ep-head">
+      <div class="ep-left">
+        <span class="badge">GET</span>
+        <span class="ep-path">/api/country/{country}?page=1</span>
+      </div>
+      <div class="ep-right">
+        <span class="ep-title">Filter Negara</span>
+        <span class="chev"><svg fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></span>
+      </div>
+    </div>
+    <div class="ep-body">
+      <div class="ep-body-inner">
+        <p class="ep-desc">Filter film berdasarkan negara. Mapping slug lokal ke slug situs sudah di-handle otomatis.</p>
+        <div class="ep-note">📌 Slug: indonesia · korea · jepang → japan · usa · china · thailand · filipina → philippines · india</div>
+        <div class="code-wrap">
+          <div class="code-top"><span class="code-lbl">Response JSON</span><button class="copy-btn" onclick="cp(this,event)">Copy</button></div>
+          <pre>{
+  <span class="k">"success"</span>: <span class="b">true</span>,
+  <span class="k">"country"</span>: <span class="s">"jepang"</span>,
+  <span class="k">"slug"</span>: <span class="s">"japan"</span>,
+  <span class="k">"page"</span>: <span class="n">1</span>,
+  <span class="k">"total"</span>: <span class="n">20</span>,
+  <span class="k">"results"</span>: [ <span class="c">/* array movie card */</span> ]
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATEGORY -->
+  <div id="category" class="sec-head">
+    <div class="sec-icon">🎭</div>
+    <h2>Kategori</h2>
+  </div>
+
+  <div class="ep" onclick="toggle(this)">
+    <div class="ep-head">
+      <div class="ep-left"><span class="badge">GET</span><span class="ep-path">/api/series?page=1</span></div>
+      <div class="ep-right"><span class="ep-title">TV Series</span><span class="chev"><svg fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></span></div>
+    </div>
+    <div class="ep-body"><div class="ep-body-inner">
+      <p class="ep-desc">Daftar TV Series yang tersedia.</p>
+      <div class="code-wrap"><div class="code-top"><span class="code-lbl">Response JSON</span><button class="copy-btn" onclick="cp(this,event)">Copy</button></div>
+      <pre>{ <span class="k">"success"</span>: <span class="b">true</span>, <span class="k">"page"</span>: <span class="n">1</span>, <span class="k">"total"</span>: <span class="n">20</span>, <span class="k">"results"</span>: [ <span class="c">...</span> ] }</pre></div>
+    </div></div>
+  </div>
+
+  <div class="ep" onclick="toggle(this)">
+    <div class="ep-head">
+      <div class="ep-left"><span class="badge">GET</span><span class="ep-path">/api/trending?page=1</span></div>
+      <div class="ep-right"><span class="ep-title">Trending</span><span class="chev"><svg fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></span></div>
+    </div>
+    <div class="ep-body"><div class="ep-body-inner">
+      <p class="ep-desc">Film dan series yang sedang trending.</p>
+      <div class="code-wrap"><div class="code-top"><span class="code-lbl">Response JSON</span><button class="copy-btn" onclick="cp(this,event)">Copy</button></div>
+      <pre>{ <span class="k">"success"</span>: <span class="b">true</span>, <span class="k">"page"</span>: <span class="n">1</span>, <span class="k">"total"</span>: <span class="n">20</span>, <span class="k">"results"</span>: [ <span class="c">...</span> ] }</pre></div>
+    </div></div>
+  </div>
+
+  <div class="ep" onclick="toggle(this)">
+    <div class="ep-head">
+      <div class="ep-left"><span class="badge">GET</span><span class="ep-path">/api/anime?page=1</span></div>
+      <div class="ep-right"><span class="ep-title">Anime</span><span class="chev"><svg fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></span></div>
+    </div>
+    <div class="ep-body"><div class="ep-body-inner">
+      <p class="ep-desc">Daftar konten kategori Anime.</p>
+      <div class="code-wrap"><div class="code-top"><span class="code-lbl">Response JSON</span><button class="copy-btn" onclick="cp(this,event)">Copy</button></div>
+      <pre>{ <span class="k">"success"</span>: <span class="b">true</span>, <span class="k">"page"</span>: <span class="n">1</span>, <span class="k">"total"</span>: <span class="n">20</span>, <span class="k">"results"</span>: [ <span class="c">...</span> ] }</pre></div>
+    </div></div>
+  </div>
+
+  <div class="ep" onclick="toggle(this)">
+    <div class="ep-head">
+      <div class="ep-left"><span class="badge">GET</span><span class="ep-path">/api/hentai?page=1</span></div>
+      <div class="ep-right"><span class="ep-title">Hentai</span><span class="chev"><svg fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></span></div>
+    </div>
+    <div class="ep-body"><div class="ep-body-inner">
+      <p class="ep-desc">Daftar konten kategori Hentai.</p>
+      <div class="code-wrap"><div class="code-top"><span class="code-lbl">Response JSON</span><button class="copy-btn" onclick="cp(this,event)">Copy</button></div>
+      <pre>{ <span class="k">"success"</span>: <span class="b">true</span>, <span class="k">"page"</span>: <span class="n">1</span>, <span class="k">"total"</span>: <span class="n">20</span>, <span class="k">"results"</span>: [ <span class="c">...</span> ] }</pre></div>
+    </div></div>
+  </div>
+
+  <div class="ep" onclick="toggle(this)">
+    <div class="ep-head">
+      <div class="ep-left"><span class="badge">GET</span><span class="ep-path">/api/semi &nbsp;|&nbsp; /api/semi/{sub}</span></div>
+      <div class="ep-right"><span class="ep-title">Film Semi</span><span class="chev"><svg fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></span></div>
+    </div>
+    <div class="ep-body"><div class="ep-body-inner">
+      <p class="ep-desc">Daftar film semi. Sub-kategori tersedia via <code>/api/semi/{sub}</code>.</p>
+      <div class="ep-note">📌 Sub: indonesia · jepang · korea · filipina · bokep · vivamax · kelas-bintang</div>
+      <div class="code-wrap"><div class="code-top"><span class="code-lbl">Response JSON</span><button class="copy-btn" onclick="cp(this,event)">Copy</button></div>
+      <pre>{ <span class="k">"success"</span>: <span class="b">true</span>, <span class="k">"category"</span>: <span class="s">"jepang"</span>, <span class="k">"page"</span>: <span class="n">1</span>, <span class="k">"total"</span>: <span class="n">20</span>, <span class="k">"results"</span>: [ <span class="c">...</span> ] }</pre></div>
+    </div></div>
+  </div>
+
+  <div class="ep" onclick="toggle(this)">
+    <div class="ep-head">
+      <div class="ep-left"><span class="badge">GET</span><span class="ep-path">/api/coming-soon?page=1</span></div>
+      <div class="ep-right"><span class="ep-title">Coming Soon</span><span class="chev"><svg fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></span></div>
+    </div>
+    <div class="ep-body"><div class="ep-body-inner">
+      <p class="ep-desc">Film yang akan segera tayang.</p>
+      <div class="code-wrap"><div class="code-top"><span class="code-lbl">Response JSON</span><button class="copy-btn" onclick="cp(this,event)">Copy</button></div>
+      <pre>{ <span class="k">"success"</span>: <span class="b">true</span>, <span class="k">"page"</span>: <span class="n">1</span>, <span class="k">"total"</span>: <span class="n">20</span>, <span class="k">"results"</span>: [ <span class="c">...</span> ] }</pre></div>
+    </div></div>
+  </div>
+
+</div>
+
+<footer>
+  <div>Cinevu API v1.1.0 &nbsp;·&nbsp; Source: <a href="https://breezyandaman.com" target="_blank">breezyandaman.com</a></div>
+  <div style="margin-top:4px">Built with Flask + BeautifulSoup</div>
+</footer>
+
+<script>
+  function toggle(el) {
+    const body = el.querySelector('.ep-body');
+    const inner = el.querySelector('.ep-body-inner');
+    const isOpen = el.classList.contains('open');
+    if (isOpen) {
+      body.style.maxHeight = '0';
+      el.classList.remove('open');
+    } else {
+      el.classList.add('open');
+      body.style.maxHeight = inner.scrollHeight + 'px';
+    }
+  }
+
+  function cp(btn, e) {
+    e.stopPropagation();
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 1800);
+    });
+  }
+
+  const sections = document.querySelectorAll('[id]');
+  const navBtns  = document.querySelectorAll('.nav-btn');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navBtns.forEach(btn => {
+          btn.classList.toggle('active', btn.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
